@@ -9,6 +9,7 @@
 #include <chrono>
 
 #include <Line.h>
+#include <Rect.h>
 
 int main()
 {
@@ -28,6 +29,7 @@ int main()
         return -1;
 
     Line lineRenderer;
+    Rect rectRenderer;
     glm::mat4 view = glm::ortho(0.0f, 640.0f, 480.0f, 0.0f, -1.0f, 1.0f);
 
     while (! glfwWindowShouldClose(window))
@@ -44,6 +46,10 @@ int main()
         lineRenderer.setColor(1,1,0);
         lineRenderer.line(100,100,100,200);
         lineRenderer.render(glm::value_ptr(view));
+
+        rectRenderer.setColor(1,0,0, 1);
+        rectRenderer.rect(200,200,100,100);
+        rectRenderer.draw(glm::value_ptr(view));
 
         glfwPollEvents();
     }

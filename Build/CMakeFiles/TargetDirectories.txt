@@ -1,3 +1,0 @@
-/home/bryce/Desktop/GuiRendering/Build/CMakeFiles/exe.dir
-/home/bryce/Desktop/GuiRendering/Build/CMakeFiles/edit_cache.dir
-/home/bryce/Desktop/GuiRendering/Build/CMakeFiles/rebuild_cache.dir
