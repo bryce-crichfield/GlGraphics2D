@@ -9,19 +9,21 @@ struct Attribute {
     int type;
     int bytesize;
 
-    static void configure(std::vector<Attribute> attributes, Shader* shader, int VBO, int VAO);
+    static int configure(std::vector<Attribute> attributes, Shader* shader, int VBO, int VAO);
 };
 
 // IMPLEMENTATION ======================================================================================================
 #include <GL/glew.h>
 
-void Attribute::configure(std::vector<Attribute> attributes, Shader* shader, int VBO, int VAO) {
+int Attribute::configure(std::vector<Attribute> attributes, Shader* shader, int VBO, int VAO) {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     int stride = 0;
+    int componentCount = 0;
     for (Attribute attribute : attributes) {
         stride += attribute.count * attribute.bytesize;
+        componentCount += attribute.count;
     }
 
     int offset = 0;
@@ -32,4 +34,6 @@ void Attribute::configure(std::vector<Attribute> attributes, Shader* shader, int
         glVertexAttribPointer(location, attribute.count, attribute.type, GL_FALSE, stride, (void*) offset);
         offset += attribute.count * attribute.bytesize;
     }
+
+    return componentCount;
 }

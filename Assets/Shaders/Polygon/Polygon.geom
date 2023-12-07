@@ -8,6 +8,7 @@ in vec4 vColor[];
 in float vRoundness[];
 in float vThickness[];
 in float vPolygonType[];
+in float vZCounter[];
 
 out vec4 fColor;
 
@@ -24,7 +25,7 @@ const int POLYGON_TYPE_OUTLINE_ELLIPSE = 4;
 
 void emit(vec2 pos)
 {
-    gl_Position = uView * vec4(pos, 0.0, 1.0);
+    gl_Position = uView * vec4(pos, vZCounter[0], 1.0);
     EmitVertex();
 }
 
@@ -302,6 +303,9 @@ void main()
     int polygonType = int(vPolygonType[0]);
     fColor = vColor[0];
 
+    // Measured the amortized cost of branching vs. not branching, and 
+    // it was about the same so I'm just going to branch, and save myself 
+    // from extra client side code.
     switch (polygonType)
     {
         case POLYGON_TYPE_LINE:
