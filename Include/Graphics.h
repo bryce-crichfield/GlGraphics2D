@@ -561,6 +561,14 @@ void Graphics::setViewport(int width, int height)
 
 void Graphics::flush()
 {
+    // Set OpenGL State
+    bool isDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+    int depthFunc;
+    glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     mShader->use();
     mShader->setMat4("uView", mView);
 
@@ -572,6 +580,12 @@ void Graphics::flush()
 
     mVertices.clear();
     mZLayer = 1;
+
+    // Restore OpenGL State
+    if (! isDepthTestEnabled)
+        glDisable(GL_DEPTH_TEST);
+
+    glDepthFunc(depthFunc);
 }
 
 void Graphics::setRoundness(float roundness)

@@ -23,13 +23,8 @@ int main()
         return -1;
 
     Graphics graphics;
-    glm::mat4 view;
 
-    glEnable(GL_MULTISAMPLE);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
     glClearColor(0, 0, 0.25, 1);
-
     while (! glfwWindowShouldClose(window))
     {
         glfwSwapBuffers(window);
@@ -40,7 +35,6 @@ int main()
         glViewport(0, 0, width, height);
         graphics.setViewport(width, height);
 
-        glDepthMask(GL_TRUE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         graphics.setColor(1.0f, 0.0f, 0.0f);
