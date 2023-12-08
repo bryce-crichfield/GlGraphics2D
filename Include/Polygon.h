@@ -49,7 +49,6 @@ class Polygon
 
     void pushAttributes(float a, float b, float c, float d, PolygonType polygonType, float startAngle = 0,
                         float endAngle = 0);
-
 };
 
 // IMPLEMENTATION ======================================================================================================
