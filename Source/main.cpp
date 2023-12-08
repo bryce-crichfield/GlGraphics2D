@@ -38,8 +38,8 @@ int main()
         int width, height;
         glfwGetWindowSize(window, &width, &height);
         glViewport(0, 0, width, height);
+        graphics.setViewport(width, height);
 
-        view = glm::ortho(0.0f, (float) width, (float) height, 0.0f, -1000000.0f, 0.01f);
         glDepthMask(GL_TRUE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -52,7 +52,7 @@ int main()
         graphics.setRoundness(2.0f);
         graphics.drawRect(200, 200, 50, 50);
 
-        graphics.flush(glm::value_ptr(view));
+        graphics.flush();
     }
 
     glfwTerminate();

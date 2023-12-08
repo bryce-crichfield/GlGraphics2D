@@ -9,6 +9,7 @@ class Polygon
   public:
     Polygon();
     ~Polygon();
+
     void drawLine(float x1, float y1, float x2, float y2);
     void drawRect(float x, float y, float width, float height);
     void drawEllipse(float x, float y, float width, float height);
@@ -18,7 +19,8 @@ class Polygon
     void fillEllipse(float x, float y, float width, float height);
     void fillCircle(float x, float y, float radius);
 
-    void flush(float* view);
+    void setViewport(int width, int height);
+    void flush();
 
     void setRoundness(float roundness);
     void setColor(float r, float g, float b, float a = 1.0f);
@@ -37,10 +39,11 @@ class Polygon
     std::unique_ptr<Shader> mShader;
     unsigned int mVAO, mVBO;
     std::vector<float> mVertices;
-    float mRoundness = 10.0f;
+    float mRoundness = 1.0f;
     float mR, mG, mB, mA = 1.0f;
     float mThickness = 1.0f;
     float mZLayer = 1;
+    float mView[16];
 
     int mComponentCount;
 
@@ -160,10 +163,16 @@ void Polygon::fillEllipse(float x, float y, float width, float height)
     pushAttributes(x, y, width, height, PolygonType::FILLED_CIRCLE);
 }
 
-void Polygon::flush(float* view)
+void Polygon::setViewport(int width, int height)
+{
+    glm::mat4 viewMatrix = glm::ortho(0.0f, (float) width, (float) height, 0.0f, -1000000.0f, 0.01f);
+    memcpy(mView, glm::value_ptr(viewMatrix), 16 * sizeof(float));
+}
+
+void Polygon::flush()
 {
     mShader->use();
-    mShader->setMat4("uView", view);
+    mShader->setMat4("uView", mView);
 
     glBindVertexArray(mVAO);
     glBindBuffer(GL_ARRAY_BUFFER, mVBO);
