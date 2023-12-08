@@ -3,14 +3,16 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 128) out;
 
-in vec2 vSize[];
+in vec2 vDimension[];
 in vec4 vColor[];
 in float vRoundness[];
 in float vThickness[];
 in float vPolygonType[];
-in float vZCounter[];
+in float vZLayer[];
+in vec2 vArcAngles[];
 
 out vec4 fColor;
+out vec2 fTexCoord;
 
 uniform mat4 uView;
 
@@ -22,12 +24,14 @@ const int POLYGON_TYPE_FILLED_RECT = 1;
 const int POLYGON_TYPE_OUTLINE_RECT = 2;
 const int POLYGON_TYPE_FILLED_ELLIPSE = 3;
 const int POLYGON_TYPE_OUTLINE_ELLIPSE = 4;
+const int POLYGON_TYPE_ARC = 5;
 
 void emit(vec2 pos)
 {
-    gl_Position = uView * vec4(pos, vZCounter[0], 1.0);
+    gl_Position = uView * vec4(pos, vZLayer[0], 1.0);
     EmitVertex();
 }
+
 
 void filledCorner(vec2 origin, float startAngle, float endAngle, float radius)
 {
@@ -85,8 +89,8 @@ void doFilledRect()
 {
     // Filled rects are described by their center point, their size and their roundness
     vec2 center = gl_in[0].gl_Position.xy;
-    float w = vSize[0].x / 2.0;
-    float h = vSize[0].y / 2.0;
+    float w = vDimension[0].x / 2.0;
+    float h = vDimension[0].y / 2.0;
     float r = vRoundness[0];
 
     // CENTER (TL, TR, BL, BR)
@@ -121,11 +125,6 @@ void doFilledRect()
     emit(center + vec2(w - r, h));
     EndPrimitive();
 
-    if (r != 0.0)
-    {
-        return;
-    }
-
     // TOP LEFT
     filledCorner(center + vec2(-w + r, -h + r), PI, PI * 1.5, r);
     // TOP RIGHT
@@ -140,8 +139,8 @@ void doOutlineRect()
 {
     // Outline rects are described by their center point, their size, their roundness and their thickness
     vec2 center = gl_in[0].gl_Position.xy;
-    float w = vSize[0].x / 2.0;
-    float h = vSize[0].y / 2.0;
+    float w = vDimension[0].x / 2.0;
+    float h = vDimension[0].y / 2.0;
     float r = vRoundness[0];
     float t = vThickness[0];
 
@@ -207,7 +206,7 @@ void doLine(bool rounded)
     // Length is aRoundness
 
     vec2 center = gl_in[0].gl_Position.xy;
-    vec2 direction = vSize[0];
+    vec2 direction = vDimension[0];
     float length = vRoundness[0];
     float thickness = vThickness[0];
 
@@ -223,6 +222,7 @@ void doLine(bool rounded)
     emit(p2);
     emit(p3);
     emit(p4);
+
     EndPrimitive();
 
     if (rounded)
@@ -243,8 +243,8 @@ void doFilledEllipse()
 {
     // the ellipse is described by its center point, and its size
     vec2 center = gl_in[0].gl_Position.xy;
-    float w = vSize[0].x / 2.0;
-    float h = vSize[0].y / 2.0;
+    float w = vDimension[0].x / 2.0;
+    float h = vDimension[0].y / 2.0;
 
     int vertexCount = 56;
 
@@ -267,8 +267,8 @@ void doOutlineEllipse()
 {
     // the ellipse is described by its center point, its size, and its thickness
     vec2 center = gl_in[0].gl_Position.xy;
-    float w = vSize[0].x / 2.0;
-    float h = vSize[0].y / 2.0;
+    float w = vDimension[0].x / 2.0;
+    float h = vDimension[0].y / 2.0;
 
     int segmentCount = 60;
 
@@ -298,6 +298,56 @@ void doOutlineEllipse()
     EndPrimitive();
 }
 
+void doArc() 
+{
+    // The arc is described by its top left corner, its bounding box and its angle
+    vec2 origin = gl_in[0].gl_Position.xy;
+    float width = vDimension[0].x;
+    float height = vDimension[0].y;
+    float startAngle = radians(vArcAngles[0].x);
+    startAngle = clamp(startAngle, 0.0, 2.0 * PI);
+    float endAngle = radians(vArcAngles[0].y);
+    endAngle = clamp(endAngle, 0.0, 2.0 * PI);
+    float thickness = vThickness[0];
+
+    int segmentCount = 60;
+
+    float angle = startAngle;
+
+    float minXRadius = width / 2.0 - thickness / 2.0;
+    float maxXRadius = width / 2.0 + thickness / 2.0;
+    float minYRadius = height / 2.0 - thickness / 2.0;
+    float maxYRadius = height / 2.0 + thickness / 2.0;
+
+
+    for (int i = 0; i <= segmentCount; i++)
+    {
+        float sinAngle = sin(angle);
+        float cosAngle = cos(angle);
+
+        float x1 = cosAngle * minXRadius;
+        x1 -= thickness / 2.0;
+        float y1 = sinAngle * minYRadius;
+        y1 -= thickness / 2.0;
+        float x2 = cosAngle * maxXRadius;
+        x2 -= thickness / 2.0;
+        float y2 = sinAngle * maxYRadius;
+        y2 -= thickness / 2.0;
+
+        // the arc should be centered in the bounding box
+        x1 += width / 2.0;
+        y1 += height / 2.0;
+        x2 += width / 2.0;
+        y2 += height / 2.0;
+
+        emit(origin + vec2(x1, y1));
+        emit(origin + vec2(x2, y2));
+        angle += (endAngle - startAngle) / segmentCount;
+    }
+
+    EndPrimitive();
+};
+
 void main()
 {
     int polygonType = int(vPolygonType[0]);
@@ -325,6 +375,9 @@ void main()
             break;
         case POLYGON_TYPE_OUTLINE_ELLIPSE:
             doOutlineEllipse();
+            break;
+        case POLYGON_TYPE_ARC:
+            doArc();
             break;
         default:
             break;

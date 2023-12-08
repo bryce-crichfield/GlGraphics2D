@@ -16,6 +16,7 @@ class Polygon
     {
         drawEllipse(x, y, radius, radius);
     }
+    void drawArc(float x, float y, float width, float height, float startAngle, float endAngle);
 
     void fillRect(float x, float y, float width, float height);
     void fillEllipse(float x, float y, float width, float height);
@@ -43,7 +44,6 @@ class Polygon
     {
         mThickness = thickness;
     }
-    float zCounter = 0;
 
   private:
     enum class PolygonType
@@ -54,6 +54,7 @@ class Polygon
         OUTLINE_RECT = 2,
         FILLED_CIRCLE = 3,
         OUTLINE_CIRCLE = 4,
+        ARC = 5
     };
 
     std::unique_ptr<Shader> mShader;
@@ -64,7 +65,9 @@ class Polygon
     float mThickness = 1.0f;
     int mComponentCount;
 
-    void pushAttributes(float a, float b, float c, float d, PolygonType polygonType);
+    void pushAttributes(float a, float b, float c, float d, PolygonType polygonType, float startAngle = 0, float endAngle = 0);
+
+    float zCounter = 1;
 };
 
 // IMPLEMENTATION ======================================================================================================
@@ -89,10 +92,11 @@ Polygon::Polygon()
     glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 
     std::vector<Attribute> attributes = {
-        {"aPos", 2, GL_FLOAT, sizeof(float)},       {"aSize", 2, GL_FLOAT, sizeof(float)},
+        {"aPos", 2, GL_FLOAT, sizeof(float)},       {"aDimension", 2, GL_FLOAT, sizeof(float)},
         {"aRoundness", 1, GL_FLOAT, sizeof(float)}, {"aColor", 4, GL_FLOAT, sizeof(float)},
         {"aThickness", 1, GL_FLOAT, sizeof(float)}, {"aPolygonType", 1, GL_FLOAT, sizeof(float)},
-        {"aZCounter", 1, GL_FLOAT, sizeof(float)}};
+        {"aZLayer", 1, GL_FLOAT, sizeof(float)}, {"aArcAngles", 2, GL_FLOAT, sizeof(float)},
+    };
 
     mComponentCount = Attribute::configure(attributes, mShader.get(), mVBO, mVAO);
 }
@@ -103,7 +107,7 @@ Polygon::~Polygon()
     glDeleteBuffers(1, &mVBO);
 }
 
-void Polygon::pushAttributes(float a, float b, float c, float d, PolygonType polygonType)
+void Polygon::pushAttributes(float a, float b, float c, float d, PolygonType polygonType, float startAngle, float endAngle)
 {
     mVertices.push_back(a);
     mVertices.push_back(b);
@@ -117,6 +121,8 @@ void Polygon::pushAttributes(float a, float b, float c, float d, PolygonType pol
     mVertices.push_back(mThickness);
     mVertices.push_back((float) polygonType);
     mVertices.push_back(zCounter++);
+    mVertices.push_back(startAngle);
+    mVertices.push_back(endAngle);
 }
 
 void Polygon::drawLine(float x1, float y1, float x2, float y2, bool rounded)
@@ -135,6 +141,11 @@ void Polygon::drawRect(float x, float y, float width, float height)
     x = x + (width / 2.0f);
     y = y + (height / 2.0f);
     pushAttributes(x, y, width, height, PolygonType::OUTLINE_RECT);
+}
+
+void Polygon::drawArc(float x, float y, float width, float height, float startAngle, float endAngle)
+{
+    pushAttributes(x, y, width, height, PolygonType::ARC, startAngle, endAngle);
 }
 
 void Polygon::fillRect(float x, float y, float width, float height)
@@ -172,5 +183,5 @@ void Polygon::draw(float* view)
     glBindVertexArray(0);
 
     mVertices.clear();
-    zCounter = 0.01f;
+    zCounter = 1;
 }

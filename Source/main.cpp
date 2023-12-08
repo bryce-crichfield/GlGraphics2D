@@ -15,8 +15,8 @@ int main()
     if (! glfwInit())
         return -1;
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    // glfwWindowHint(GLFW_SAMPLES, 4);
+    // glfwWindowHint(GLFW_DEPTH_BITS, 24);
     GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (! window)
     {
@@ -35,7 +35,7 @@ int main()
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    glClearColor(0, 0, .25f, 1);
+    glClearColor(0, 0, 0.25, 1);
 
     while (! glfwWindowShouldClose(window))
     {
@@ -47,27 +47,18 @@ int main()
         glViewport(0, 0, width, height);
 
         view = glm::ortho(0.0f, (float) width, (float) height, 0.0f, -1000000.0f, 0.01f);
-        // view = glm::perspective(glm::radians(90.0f), (float) width / (float) height, 0.01f, 100.0f);
         glDepthMask(GL_TRUE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        auto startTime = std::chrono::high_resolution_clock::now();
+        polygonRenderer.setColor(1.0f, 0.0f, 0.0f);
+        polygonRenderer.setThickness(10.0f);
 
-        polygonRenderer.setColor(0, 1, 0);
-        polygonRenderer.fillCircle(100, 100, 50);
+        polygonRenderer.drawLine(50, 50, 200, 200);
 
-        polygonRenderer.setColor(1, 0, 0);
-        polygonRenderer.fillCircle(100, 100, 75);
-
-        polygonRenderer.zCounter = 1;
-        polygonRenderer.setColor(0, 0, 1);
-        polygonRenderer.fillCircle(100, 100, 100);
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         polygonRenderer.draw(glm::value_ptr(view));
     }
 
     glfwTerminate();
-
     return 0;
 }
