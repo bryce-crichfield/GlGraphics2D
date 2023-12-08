@@ -3,7 +3,7 @@
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
 
-#include <Polygon.h>
+#include <Graphics.h>
 
 int main()
 {
@@ -22,7 +22,7 @@ int main()
     if (glewInit() != GLEW_OK)
         return -1;
 
-    Polygon graphics;
+    Graphics graphics;
     glm::mat4 view;
 
     glEnable(GL_MULTISAMPLE);

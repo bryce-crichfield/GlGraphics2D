@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 
-class Polygon
+class Graphics
 {
   public:
-    Polygon();
-    ~Polygon();
+    Graphics();
+    ~Graphics();
 
     void drawLine(float x1, float y1, float x2, float y2);
     void drawRect(float x, float y, float width, float height);
@@ -452,7 +452,7 @@ const char* fragmentShaderSource = R"(
     }
 )";
 
-Polygon::Polygon()
+Graphics::Graphics()
 {
     Shader* shader = Shader::loadFromSource(vertexShaderSource, geometryShaderSource, fragmentShaderSource);
     mShader = std::unique_ptr<Shader>(shader);
@@ -473,13 +473,13 @@ Polygon::Polygon()
     mComponentCount = Attribute::configure(attributes, mShader.get(), mVBO, mVAO);
 }
 
-Polygon::~Polygon()
+Graphics::~Graphics()
 {
     glDeleteVertexArrays(1, &mVAO);
     glDeleteBuffers(1, &mVBO);
 }
 
-void Polygon::pushAttributes(float a, float b, float c, float d, PolygonType polygonType, float startAngle,
+void Graphics::pushAttributes(float a, float b, float c, float d, PolygonType polygonType, float startAngle,
                              float endAngle)
 {
     mVertices.push_back(a);
@@ -498,7 +498,7 @@ void Polygon::pushAttributes(float a, float b, float c, float d, PolygonType pol
     mVertices.push_back(endAngle);
 }
 
-void Polygon::drawLine(float x1, float y1, float x2, float y2)
+void Graphics::drawLine(float x1, float y1, float x2, float y2)
 {
     // Lines are described by their center point, their direction and their length
     // Direction is aSize
@@ -508,36 +508,36 @@ void Polygon::drawLine(float x1, float y1, float x2, float y2)
     pushAttributes(x1, y1, direction.x, direction.y, PolygonType::LINE);
 };
 
-void Polygon::drawRect(float x, float y, float width, float height)
+void Graphics::drawRect(float x, float y, float width, float height)
 {
     x = x + (width / 2.0f);
     y = y + (height / 2.0f);
     pushAttributes(x, y, width, height, PolygonType::OUTLINE_RECT);
 }
 
-void Polygon::drawArc(float x, float y, float width, float height, float startAngle, float endAngle)
+void Graphics::drawArc(float x, float y, float width, float height, float startAngle, float endAngle)
 {
     pushAttributes(x, y, width, height, PolygonType::ARC, startAngle, endAngle);
 }
 
-void Polygon::drawCircle(float x, float y, float radius)
+void Graphics::drawCircle(float x, float y, float radius)
 {
     drawEllipse(x, y, radius, radius);
 }
 
-void Polygon::fillCircle(float x, float y, float radius)
+void Graphics::fillCircle(float x, float y, float radius)
 {
     fillEllipse(x, y, radius, radius);
 }
 
-void Polygon::fillRect(float x, float y, float width, float height)
+void Graphics::fillRect(float x, float y, float width, float height)
 {
     x = x + (width / 2.0f);
     y = y + (height / 2.0f);
     pushAttributes(x, y, width, height, PolygonType::FILLED_RECT);
 }
 
-void Polygon::drawEllipse(float x, float y, float width, float height)
+void Graphics::drawEllipse(float x, float y, float width, float height)
 {
     // the ellipse is described by its center point, its width and its height
     x = x + (width / 2.0f);
@@ -545,7 +545,7 @@ void Polygon::drawEllipse(float x, float y, float width, float height)
     pushAttributes(x, y, width, height, PolygonType::OUTLINE_CIRCLE);
 }
 
-void Polygon::fillEllipse(float x, float y, float width, float height)
+void Graphics::fillEllipse(float x, float y, float width, float height)
 {
     // the ellipse is described by its center point, its width and its height
     x = x + (width / 2.0f);
@@ -553,13 +553,13 @@ void Polygon::fillEllipse(float x, float y, float width, float height)
     pushAttributes(x, y, width, height, PolygonType::FILLED_CIRCLE);
 }
 
-void Polygon::setViewport(int width, int height)
+void Graphics::setViewport(int width, int height)
 {
     glm::mat4 viewMatrix = glm::ortho(0.0f, (float) width, (float) height, 0.0f, -1000000.0f, 0.01f);
     memcpy(mView, glm::value_ptr(viewMatrix), 16 * sizeof(float));
 }
 
-void Polygon::flush()
+void Graphics::flush()
 {
     mShader->use();
     mShader->setMat4("uView", mView);
@@ -574,12 +574,12 @@ void Polygon::flush()
     mZLayer = 1;
 }
 
-void Polygon::setRoundness(float roundness)
+void Graphics::setRoundness(float roundness)
 {
     mRoundness = roundness;
 }
 
-void Polygon::setColor(float r, float g, float b, float a)
+void Graphics::setColor(float r, float g, float b, float a)
 {
     mR = r;
     mG = g;
@@ -587,7 +587,7 @@ void Polygon::setColor(float r, float g, float b, float a)
     mA = a;
 }
 
-void Polygon::setThickness(float thickness)
+void Graphics::setThickness(float thickness)
 {
     mThickness = thickness;
 }
