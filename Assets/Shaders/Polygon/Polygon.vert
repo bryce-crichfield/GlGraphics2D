@@ -16,7 +16,6 @@ out float vThickness;
 out float vPolygonType;
 out float vZLayer;
 out vec2 vArcAngles;
-out vec4 vEndColor;
 
 void main() {
     gl_Position = vec4(aPos, 0, 1.0);

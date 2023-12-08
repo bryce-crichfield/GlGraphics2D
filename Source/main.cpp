@@ -3,11 +3,6 @@
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
 
-#include <chrono>
-#include <iostream>
-#include <memory>
-#include <vector>
-
 #include <Polygon.h>
 
 int main()
@@ -15,8 +10,6 @@ int main()
     if (! glfwInit())
         return -1;
 
-    // glfwWindowHint(GLFW_SAMPLES, 4);
-    // glfwWindowHint(GLFW_DEPTH_BITS, 24);
     GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (! window)
     {
@@ -29,7 +22,7 @@ int main()
     if (glewInit() != GLEW_OK)
         return -1;
 
-    Polygon polygonRenderer;
+    Polygon graphics;
     glm::mat4 view;
 
     glEnable(GL_MULTISAMPLE);
@@ -50,13 +43,16 @@ int main()
         glDepthMask(GL_TRUE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        polygonRenderer.setColor(1.0f, 0.0f, 0.0f);
-        polygonRenderer.setThickness(10.0f);
+        graphics.setColor(1.0f, 0.0f, 0.0f);
+        graphics.setThickness(10.0f);
+        graphics.drawLine(50, 50, 200, 200);
 
-        polygonRenderer.drawLine(50, 50, 200, 200);
+        graphics.setColor(0.0f, 1.0f, 0.0f);
+        graphics.setThickness(5.0f);
+        graphics.setRoundness(2.0f);
+        graphics.drawRect(200, 200, 50, 50);
 
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        polygonRenderer.draw(glm::value_ptr(view));
+        graphics.flush(glm::value_ptr(view));
     }
 
     glfwTerminate();

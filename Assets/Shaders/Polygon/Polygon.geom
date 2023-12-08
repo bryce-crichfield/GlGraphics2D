@@ -18,7 +18,6 @@ uniform mat4 uView;
 
 const float PI = 3.1415926535897932384626433832795;
 
-const int POLYGON_TYPE_ROUNDED_LINE = -1;
 const int POLYGON_TYPE_LINE = 0;
 const int POLYGON_TYPE_FILLED_RECT = 1;
 const int POLYGON_TYPE_OUTLINE_RECT = 2;
@@ -31,7 +30,6 @@ void emit(vec2 pos)
     gl_Position = uView * vec4(pos, vZLayer[0], 1.0);
     EmitVertex();
 }
-
 
 void filledCorner(vec2 origin, float startAngle, float endAngle, float radius)
 {
@@ -179,27 +177,7 @@ void doOutlineRect()
     outlineCorner(center + vec2(w - r, h - r), 0.0, PI * 0.5, r, t);
 }
 
-void drawCaps(vec2 center, float thickness, float angleOffset)
-{
-    int CIRCLE_VERT_COUNT = 6;
-    float radius = thickness / 2.0f;
-
-    float angle;
-    for (int i = 0; i <= CIRCLE_VERT_COUNT; i++)
-    {
-        angle = (i * PI) / float(CIRCLE_VERT_COUNT);
-        angle += angleOffset;
-        float x = cos(angle) * radius;
-        float y = sin(angle) * radius;
-
-        emit(center + vec2(x, y));
-        emit(center);
-    }
-
-    EndPrimitive();
-}
-
-void doLine(bool rounded)
+void doLine()
 {
     // Lines are described by their center point, their direction and their length
     // Direction is aSize
@@ -224,19 +202,6 @@ void doLine(bool rounded)
     emit(p4);
 
     EndPrimitive();
-
-    if (rounded)
-    {
-        vec2 dir = normalize(direction);
-
-        vec2 startCapCenter = center - normal;
-        float startCapAngleOffset = atan(dir.y, dir.x) + (PI / 2.0);
-        drawCaps(startCapCenter, vThickness[0], startCapAngleOffset);
-
-        vec2 endCapCenter = center + normal + direction;
-        float endCapAngleOffset = atan(dir.y, dir.x) - (PI / 2.0);
-        drawCaps(endCapCenter, vThickness[0], endCapAngleOffset);
-    }
 }
 
 void doFilledEllipse()
@@ -359,10 +324,7 @@ void main()
     switch (polygonType)
     {
         case POLYGON_TYPE_LINE:
-            doLine(false);
-            break;
-        case POLYGON_TYPE_ROUNDED_LINE:
-            doLine(true);
+            doLine();
             break;
         case POLYGON_TYPE_FILLED_RECT:
             doFilledRect();
