@@ -1,4 +1,4 @@
-# Graphics
+# GlGraphics2D
 
 This library implements a simple 2D vector graphics class in C++ and OpenGL.  The library provides a class based API, with support for the following graphics primitives:
 - Lines
